@@ -46,22 +46,49 @@ int init(char* file){
 	return 1;
 }
 
-void action(){
+void select_group(){
+	int curs_x, curs_y;
+	getyx(stdscr, curs_y, curs_x);
+	
+	struct point current_point = g.map[curs_x][curs_y];
+	
+	groupSelection = current_point.group;
+}
+
+void deselect(){
+	groupSelection = 0;
+}
+
+void apply(){
 	int curs_x, curs_y;
 	getyx(stdscr, curs_y, curs_x);
 	
 	struct point current_point = g.map[curs_x][curs_y];
 	
 	if(current_point.is_node)
-		groupSelection = current_point.group;
-	else{
-		if(current_point.group == 0){
-			g.map[curs_x][curs_y].group = groupSelection;
-		} else {
-			g.map[curs_x][curs_y].group = 0;
-		}
+		deselect();	
+	else
+		g.map[curs_x][curs_y].group = groupSelection;
+}
+
+void remove_point(){
+	int curs_x, curs_y;
+	getyx(stdscr, curs_y, curs_x);
+	
+	struct point current_point = g.map[curs_x][curs_y];
+
+	if(!current_point.is_node)
+		g.map[curs_x][curs_y].group = 0;
+
+}
+
+void action(){
+	if( !groupSelection == 0 ){
+		apply();
 	}
 }
+
+
 
 int loop(){
 	int ch;
@@ -77,32 +104,45 @@ int loop(){
 	draw();
 	
 	switch(ch = getch()){
-		case KEY_UP:
-			if(curs_y>0)
+		case KEY_UP: case 'w':
+			if(curs_y>0){
 				move(--curs_y, curs_x);
-			else
+				action();
+			}else
 				beep();
 			break;
-		case KEY_DOWN:
-			if(curs_y<bound_y-1 && curs_y<max_y-1)
+		case KEY_DOWN: case 'a':
+			if(curs_y<bound_y-1 && curs_y<max_y-1){
 				move(++curs_y, curs_x);
-			else
+				action();
+			}else
 				beep();
 			break;
-		case KEY_LEFT:
-			if(curs_x>0)
+		case KEY_LEFT: case 's':
+			if(curs_x>0){
 				move(curs_y, --curs_x);
-			else
+				action();
+			}else
 				beep();
 			break;
-		case KEY_RIGHT:
-			if(curs_x<bound_x-1 && curs_x<max_x-1)
+		case KEY_RIGHT: case 'd':
+			if(curs_x<bound_x-1 && curs_x<max_x-1){
 				move(curs_y, ++curs_x);
-			else
+				action();
+			}else
 				beep();
+			break;
+		case 127:
+			remove_point();
 			break;
 		case ' ':
-			action();
+			if(groupSelection == 0)
+				select_group();
+			else
+				deselect();
+			break;
+		case 27: case 9: //Escape or tab
+			deselect();
 			break;
 		case 'q':
 			return 0;

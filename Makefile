@@ -4,6 +4,8 @@ CFLAGS	=	-g -Wall -Wextra -Wpedantic
 LIBS	=	-lncurses
 OBJS	:=	$(patsubst src/%.c,obj/%.o,$(wildcard src/*.c))
 
+all: flow-foss
+
 flow-foss: $(OBJS)
 	gcc $(LIBS) -o $@ $^
 
@@ -12,8 +14,6 @@ obj/%.o: src/%.c | obj
 
 obj:
 	mkdir -p obj
-
-all: flow-foss
 
 run: flow-foss
 	./flow-foss
